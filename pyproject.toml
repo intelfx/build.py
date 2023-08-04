@@ -18,6 +18,9 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
 ]
 
+[project.scripts]
+buildctl = "buildpy.cli:buildctl"
+
 [project.urls]
 "Homepage" = "https://github.com/intelfx/build.py"
 "Bug Tracker" = "https://github.com/intelfx/build.py/issues"
