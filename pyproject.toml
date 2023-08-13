@@ -30,5 +30,6 @@ minversion = "6.0"
 addopts = [
     "--import-mode=importlib",
 ]
-pythonpath = [ "src" ]
+# FIXME: drop "." after solving https://github.com/pytest-dev/pytest/issues/8964
+pythonpath = [ "src", "." ]
 testpaths = [ "tests" ]
