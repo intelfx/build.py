@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 [project.scripts]
-buildctl = "buildpy.cli:buildctl"
+buildctl = "buildpy.cli.buildctl:buildctl"
 
 [project.urls]
 "Homepage" = "https://github.com/intelfx/build.py"
