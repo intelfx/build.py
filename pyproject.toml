@@ -18,6 +18,10 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
 ]
 
+dependencies = [
+    "Click",
+]
+
 [project.scripts]
 buildctl = "buildpy.cli.buildctl:buildctl"
 
