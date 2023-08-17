@@ -1,11 +1,8 @@
-import contextlib
-import sys
-import tempfile
-from pathlib import Path
 import pytest
 
 import buildpy.util
 from tests.util import tmp_file
+
 
 CUSTOM_NAME = 'custom'
 CUSTOM_SECTION = r'''
@@ -203,4 +200,3 @@ def test_pacman_conf(tmp_file):
 	pacman_conf = tmp_file(PACMAN_CONF, prefix="pacman", suffix=".conf")
 	with buildpy.util.pacman_conf_prepend_repo(pacman_conf, CUSTOM_NAME, CUSTOM_SECTION) as output_conf:
 		assert output_conf.read() == PACMAN_CONF_CUSTOM_PREPEND
-
