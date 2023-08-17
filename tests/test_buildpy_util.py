@@ -200,3 +200,10 @@ def test_pacman_conf(tmp_file):
 	pacman_conf = tmp_file(PACMAN_CONF, prefix="pacman", suffix=".conf")
 	with buildpy.util.pacman_conf_prepend_repo(pacman_conf, CUSTOM_NAME, CUSTOM_SECTION) as output_conf:
 		assert output_conf.read() == PACMAN_CONF_CUSTOM_PREPEND
+
+
+@pytest.mark.xfail
+def test_pacman_conf2(tmp_file):
+	pacman_conf = tmp_file(PACMAN_CONF, prefix="pacman", suffix=".conf")
+	with buildpy.util.pacman_conf_prepend_repo2(pacman_conf, CUSTOM_NAME, CUSTOM_SECTION) as output_conf:
+		assert output_conf.read() == PACMAN_CONF_CUSTOM_PREPEND

@@ -20,6 +20,7 @@ classifiers = [
 
 dependencies = [
     "Click",
+    "configupdater",
 ]
 
 [project.scripts]
