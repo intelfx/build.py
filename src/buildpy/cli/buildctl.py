@@ -19,3 +19,9 @@ def buildctl(ctx: click.Context):
 		config=Config(),
 	)
 	pass
+
+
+@buildctl.command(name='review-repo')
+@click.pass_obj
+def review_repo(ctx: AppContext):
+	config = ctx.config
