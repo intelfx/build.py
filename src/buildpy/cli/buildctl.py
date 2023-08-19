@@ -1,6 +1,7 @@
 import click
 import attr, attrs
 
+import buildpy.proc
 import buildpy.util
 from buildpy.config import Config
 
@@ -25,3 +26,6 @@ def buildctl(ctx: click.Context):
 @click.pass_obj
 def review_repo(ctx: AppContext):
 	config = ctx.config
+
+	# find pkgbuilds
+	pkgbuilds = buildpy.proc.find_pkgbuilds(config)
