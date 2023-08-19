@@ -16,20 +16,19 @@ def with_newline(arg: str) -> str:
 	return arg
 
 
-@contextlib.contextmanager
 def pacman_conf_prepend_repo2(pacman_conf: Path, repo_name: str, repo_section: str) -> typing.TextIO:
-	repo_text = f"[{repo_name}]\n{repo_section}"
+	repo_text = f'[{repo_name}]\n{repo_section}'
 	section = ConfigUpdater(allow_no_value=True)
 	section.read_string(repo_text)
 
 	conf = ConfigUpdater(allow_no_value=True)
 	conf.read(pacman_conf)
-	conf["options"].add_after.section(section[repo_name].detach()).space(2)
+	conf['options'].add_after.section(section[repo_name].detach()).space(2)
 
-	with tempfile.NamedTemporaryFile(mode="w+", prefix='pacman', suffix='.conf') as f:
-		conf.write(f)
-		f.seek(0)
-		yield f
+	f = tempfile.NamedTemporaryFile(mode='w+', prefix='pacman', suffix='.conf')
+	conf.write(f)
+	f.seek(0)
+	return f
 
 
 def pacman_conf_prepend_repo(pacman_conf: Path, repo_name: str, repo_section: str) -> typing.TextIO:
