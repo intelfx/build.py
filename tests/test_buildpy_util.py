@@ -207,3 +207,35 @@ def test_pacman_conf2(tmp_file):
 	pacman_conf = tmp_file(PACMAN_CONF, prefix="pacman", suffix=".conf")
 	with buildpy.util.pacman_conf_prepend_repo2(pacman_conf, CUSTOM_NAME, CUSTOM_SECTION) as output_conf:
 		assert output_conf.read() == PACMAN_CONF_CUSTOM_PREPEND
+
+
+def test_checking_popen(tmp_path):
+	(tmp_path/'file1').touch()
+	(tmp_path/'file2').touch()
+
+	with buildpy.util.Popen(
+		['ls', '-1', tmp_path],
+		text=True,
+		stdout=subprocess.PIPE,
+		stderr=subprocess.PIPE,
+	) as f1:
+		stderr = f1.stderr.readlines()
+		stdout = f1.stdout.readlines()
+		assert not stderr
+		assert len(stdout) == 2
+		assert 'file1' in stdout
+		assert 'file2' in stdout
+
+	with buildpy.util.Popen(
+			['ls', '-1', tmp_path/'file1', tmp_path/'file2', tmp_path/'file3'],
+			text=True,
+			stdout=subprocess.PIPE,
+			stderr=subprocess.PIPE,
+	) as f2:
+		stderr = f2.stderr.readlines()
+		stdout = f2.stdout.readlines()
+		assert f2.wait() != 0
+		assert len(stderr) == 1
+		assert len(stdout) == 2
+		assert 'file1' in stdout
+		assert 'file2' in stdout

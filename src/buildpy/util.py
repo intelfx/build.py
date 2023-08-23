@@ -1,4 +1,6 @@
+import functools
 import re
+import subprocess
 import tempfile
 import typing
 from pathlib import Path
@@ -51,3 +53,28 @@ def pacman_conf_prepend_repo(pacman_conf: Path, repo_name: str, repo_section: st
 	f.write(text)
 	f.seek(0)
 	return f
+
+
+class Popen(subprocess.Popen):
+	_check: bool
+
+	@functools.wraps(subprocess.Popen.__init__)
+	# explode commonly used parameters by hand to aid PyCharm code completion
+	def __init__(
+			self, args, *, stdin=None, stdout=None, stderr=None, cwd=None,
+			env=None, text=None, encoding=None, errors=None, check=False, **kwargs
+	):
+		super().__init__(
+			args=args, stdin=stdin, stdout=stdout, stderr=stderr, cwd=cwd,
+			env=env, text=text, encoding=encoding, errors=errors, **kwargs,
+		)
+		self._check = check
+
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		try:
+			super().__exit__(exc_type, exc_val, exc_tb)  # will wait()
+		finally:
+			if self._check:
+				assert self.returncode is not None
+				if self.returncode != 0:
+					raise subprocess.CalledProcessError(self.returncode, self.args)
