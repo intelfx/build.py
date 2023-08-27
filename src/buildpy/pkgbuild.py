@@ -49,8 +49,7 @@ class PKGBUILD:
 	def from_config(cls, config_file: Path):
 		raise NotImplementedError()
 
-	def run_makepkg(self, args: list[str], *, config: Config, **kwargs) \
-			-> subprocess.CompletedProcess[str]:
+	def _makepkg_args(self, args: list[str], *, config: Config) -> list[str]:
 		cmdline: list[str] = [ 'makepkg' ]
 		if config.makepkg_conf:
 			cmdline += [ '--config', config.makepkg_conf ]
@@ -59,11 +58,25 @@ class PKGBUILD:
 			# don't bother with computing relative path
 			cmdline += [ '-p', self.pkgbuild_file.name ]
 		cmdline += args
+		return cmdline
 
+	def run_makepkg(self, args: list[str], *, config: Config, **kwargs) \
+			-> subprocess.CompletedProcess[str]:
 		return subprocess.run(
-			args=cmdline,
+			args=self._makepkg_args(args, config=config),
 			cwd=self.pkgbuild_file.parent,
 			check=True,
+			text=True,
+			stdin=subprocess.DEVNULL,
+			stdout=subprocess.PIPE,
+			**kwargs,
+		)
+
+	def pipe_makepkg(self, args: list[str], *, config: Config, **kwargs) \
+			-> subprocess.Popen[str]:
+		return subprocess.Popen(
+			args=self._makepkg_args(args, config=config),
+			cwd=self.pkgbuild_file.parent,
 			text=True,
 			stdin=subprocess.DEVNULL,
 			stdout=subprocess.PIPE,
