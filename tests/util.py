@@ -2,6 +2,7 @@ from collections import abc
 import contextlib
 from pathlib import Path
 import tempfile
+import typing
 
 import pytest
 
@@ -39,3 +40,11 @@ def tmp_fileobj(tmp_path) -> abc.Generator[Path, None, None]:
 			f.seek(0)
 			yield f
 	return _make_fileobj
+
+
+def readlines(fobj: typing.IO) -> abc.Iterator[str]:
+	return (line.rstrip('\n') for line in fobj)
+
+
+def readlines_list(fobj: typing.IO) -> list[str]:
+	return fobj.read().splitlines()
