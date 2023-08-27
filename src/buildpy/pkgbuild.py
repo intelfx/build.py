@@ -1,6 +1,9 @@
 import enum
 import subprocess
 from pathlib import Path
+from typing import (
+	Any,
+)
 
 import attr, attrs
 attr.s, attr.ib = attrs.define, attrs.field
@@ -27,6 +30,7 @@ class PKGBUILD:
 	base_dir: Path
 	pkgbuild_file: Path
 	# TODO: per-pkgbase config
+	# TODO: git dir
 
 	pkgbase: str = None
 	pkgname: list[str] = None
@@ -80,5 +84,27 @@ class PKGBUILD:
 			text=True,
 			stdin=subprocess.DEVNULL,
 			stdout=subprocess.PIPE,
+			**kwargs,
+		)
+
+	def has_git(self) -> bool:
+		# TODO: use git dir
+		git_dir = self.base_dir/'.git'
+		return git_dir.exists()
+
+	def run_git(self, args: list[str], *, config: Config, **kwargs) \
+			-> subprocess.CompletedProcess[str]:
+		if not self.has_git():
+			self.r4ise(f'run_git() in a non-git-tracked package')
+		# TODO: use git dir
+		git_root = self.base_dir
+		cmdline: list[str] = [ 'git' ]
+		cmdline += args
+
+		return subprocess.run(
+			args=cmdline,
+			cwd=git_root,
+			check=True,
+			text=True,
 			**kwargs,
 		)
