@@ -1,6 +1,12 @@
+import subprocess
+from pathlib import Path
+
 import pytest
+import attr, attrs
+attr.s, attr.ib = attrs.define, attrs.field
 
 import buildpy.util
+import tests.util
 from tests.util import tmp_file
 
 
@@ -209,33 +215,112 @@ def test_pacman_conf2(tmp_file):
 		assert output_conf.read() == PACMAN_CONF_CUSTOM_PREPEND
 
 
-def test_checking_popen(tmp_path):
-	(tmp_path/'file1').touch()
-	(tmp_path/'file2').touch()
+@attr.s
+class PopenFiles:
+	nr: int
+	basedir: Path
+	names: list[str]
+	names_with_bad: list[str]
+	paths: list[Path]
+	paths_with_bad: list[Path]
 
-	with buildpy.util.Popen(
-		['ls', '-1', tmp_path],
-		text=True,
-		stdout=subprocess.PIPE,
-		stderr=subprocess.PIPE,
-	) as f1:
-		stderr = f1.stderr.readlines()
-		stdout = f1.stdout.readlines()
-		assert not stderr
-		assert len(stdout) == 2
-		assert 'file1' in stdout
-		assert 'file2' in stdout
 
+@pytest.fixture
+def popen_files(tmp_path):
+	# enough to fill a pipe buffer
+	NR_FILES = 1000
+	filenames = [ f'file{i}' for i in range(NR_FILES) ]
+	filepaths = [ tmp_path/n for n in filenames ]
+	for p in filepaths:
+		p.touch()
+	badname = 'file_does_not_exist'
+	badpath = tmp_path/badname
+
+	return PopenFiles(
+		nr=NR_FILES,
+		basedir=tmp_path,
+		names=filenames,
+		names_with_bad=filenames + [badname],
+		paths=filepaths,
+		paths_with_bad=filepaths + [badpath],
+	)
+
+
+def test_popen_success(popen_files):
 	with buildpy.util.Popen(
-			['ls', '-1', tmp_path/'file1', tmp_path/'file2', tmp_path/'file3'],
+			['ls', '-1', popen_files.basedir],
 			text=True,
+			stdin=subprocess.DEVNULL,
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
-	) as f2:
-		stderr = f2.stderr.readlines()
-		stdout = f2.stdout.readlines()
-		assert f2.wait() != 0
+	) as f:
+		stdout = tests.util.readlines_list(f.stdout)
+		assert set(stdout) == set(popen_files.names)
+		stderr = tests.util.readlines_list(f.stderr)
+		assert not stderr
+
+
+def test_popen_nonzero(popen_files):
+	with buildpy.util.Popen(
+			['ls', '-1'] + popen_files.paths_with_bad,
+			text=True,
+			stdin=subprocess.DEVNULL,
+			stdout=subprocess.PIPE,
+			stderr=subprocess.PIPE,
+	) as f:
+		stdout = tests.util.readlines_list(f.stdout)
+		assert set(stdout) == set(map(str, popen_files.paths))
+		stderr = tests.util.readlines_list(f.stderr)
 		assert len(stderr) == 1
-		assert len(stdout) == 2
-		assert 'file1' in stdout
-		assert 'file2' in stdout
+		assert f.wait() != 0
+
+
+def test_popen_success_check(popen_files):
+	with buildpy.util.Popen(
+			['ls', '-1', popen_files.basedir],
+			text=True,
+			check=True,
+			stdin=subprocess.DEVNULL,
+			stdout=subprocess.PIPE,
+			stderr=subprocess.PIPE,
+	) as f:
+		stdout = tests.util.readlines_list(f.stdout)
+		assert set(stdout) == set(popen_files.names)
+		stderr = tests.util.readlines_list(f.stderr)
+		assert not stderr
+
+
+def test_popen_nonzero_check(popen_files):
+	with pytest.raises(subprocess.CalledProcessError):
+		with buildpy.util.Popen(
+				['ls', '-1'] + popen_files.paths_with_bad,
+				text=True,
+				check=True,
+				stdin=subprocess.DEVNULL,
+				stdout=subprocess.PIPE,
+				stderr=subprocess.PIPE,
+		) as f:
+			stdout = tests.util.readlines_list(f.stdout)
+			assert set(stdout) == set(map(str, popen_files.paths))
+			stderr = tests.util.readlines_list(f.stderr)
+			assert len(stderr) == 1
+
+
+def test_popen_nonzero_check_raises(popen_files):
+	with pytest.raises(subprocess.CalledProcessError) as exc_info:
+		with buildpy.util.Popen(
+				['ls', '-1'] + popen_files.paths_with_bad,
+				text=True,
+				check=True,
+				stdin=subprocess.DEVNULL,
+				stdout=subprocess.PIPE,
+				stderr=subprocess.STDOUT,
+		) as f:
+			filepaths_str = set(map(str, popen_files.paths))
+			# must raise eventually
+			for line in tests.util.readlines(f.stdout):
+				if line not in filepaths_str:
+					raise RuntimeError(f'got an unexpected line: {line}')
+
+	assert type(exc_info.value) is subprocess.CalledProcessError
+	assert type(exc_info.value.__context__) is RuntimeError
