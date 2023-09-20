@@ -34,6 +34,7 @@ class PKGBUILD:
 
 	pkgbase: str = None
 	pkgname: list[str] = None
+	srcinfo: Any = None
 
 	def __str__(self):
 		return f'PKGBUILD({self.pkgbuild_file})'
