@@ -23,3 +23,4 @@ class Pkgname:
 	depends: 'list[Pkgname|str]'
 	makedepends: 'list[Pkgname|str]'
 	optdepends: 'list[Pkgname|str]'
+	provides: 'list[str]'
