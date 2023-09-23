@@ -3,6 +3,7 @@ import typing
 from collections import abc
 import re
 from typing import (
+	TYPE_CHECKING,
 	TypeAlias,
 )
 
@@ -10,7 +11,8 @@ import attr, attrs
 attr.s, attr.ib = attrs.define, attrs.field
 
 from buildpy.config import Config
-from buildpy.pkgbuild import PKGBUILD
+if TYPE_CHECKING:
+	from buildpy.pkgbuild import PKGBUILD
 
 
 # no tagged unions in python :-(
@@ -28,7 +30,7 @@ class SRCINFO:
 	sections: dict[SrcinfoSectionHeader, SrcinfoSection]
 
 	@classmethod
-	def from_lines(cls, srcinfo_lines: abc.Iterable[str], pkgbuild: PKGBUILD):
+	def from_lines(cls, srcinfo_lines: abc.Iterable[str], pkgbuild: 'PKGBUILD'):
 		section_keys = (
 			'pkgbase',
 			'pkgname',
@@ -144,10 +146,10 @@ class SRCINFO:
 		return cls(headers=headers, sections=sections)
 
 	@classmethod
-	def from_file(cls, srcinfo_file: typing.TextIO, pkgbuild: PKGBUILD):
+	def from_file(cls, srcinfo_file: typing.TextIO, pkgbuild: 'PKGBUILD'):
 		return cls.from_lines(srcinfo_file.readlines(), pkgbuild=pkgbuild)
 
 	@classmethod
-	def from_pkgbuild(cls, pkgbuild: PKGBUILD, config: Config):
+	def from_pkgbuild(cls, pkgbuild: 'PKGBUILD', config: Config):
 		srcinfo = pkgbuild.run_makepkg([ '--printsrcinfo' ], config=config)
 		return cls.from_lines(srcinfo.stdout.splitlines(), pkgbuild=pkgbuild)

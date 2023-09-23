@@ -2,13 +2,15 @@ import enum
 import subprocess
 from pathlib import Path
 from typing import (
-	Any,
+	TYPE_CHECKING,
 )
 
 import attr, attrs
 attr.s, attr.ib = attrs.define, attrs.field
 
 from buildpy.config import Config
+if TYPE_CHECKING:
+	from buildpy.srcinfo import SRCINFO
 
 
 @attr.s
@@ -34,7 +36,7 @@ class PKGBUILD:
 
 	pkgbase: str = None
 	pkgname: list[str] = None
-	srcinfo: Any = None
+	srcinfo: 'SRCINFO' = None
 
 	def __str__(self):
 		return f'PKGBUILD({self.pkgbuild_file})'
