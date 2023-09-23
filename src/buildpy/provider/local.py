@@ -25,8 +25,14 @@ class LocalPackageProvider(PackageProvider):
 			pkgbase_section = p.srcinfo.sections[('pkgbase', p.pkgbase)]
 			assert len(p.pkgname) == 1 or 'provides' not in pkgbase_section
 
+			if 'epoch' in pkgbase_section:
+				version = f'{pkgbase_section["epoch"]}:{pkgbase_section["pkgver"]}-{pkgbase_section["pkgrel"]}'
+			else:
+				version = f'{pkgbase_section["pkgver"]}-{pkgbase_section["pkgrel"]}'
+
 			pkgbase = Pkgbase(
 				pkgbase=p.pkgbase,
+				version=version,
 				pkgnames=[],
 				depends=pkgbase_section.get('depends', []),
 				optdepends=pkgbase_section.get('optdepends', []),

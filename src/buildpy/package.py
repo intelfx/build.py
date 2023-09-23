@@ -9,6 +9,7 @@ attr.s, attr.ib = attrs.define, attrs.field
 @attr.s
 class Pkgbase:
 	pkgbase: str
+	version: str
 	pkgnames: 'list[Pkgname]'
 	depends: 'list[Pkgname|str]'
 	makedepends: 'list[Pkgname|str]'
