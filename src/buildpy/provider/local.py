@@ -3,6 +3,7 @@ from typing import (
 )
 
 from buildpy.package import Pkgbase, Pkgname
+from buildpy.pkgbuild import PKGBUILD
 from .base import PackageProvider
 
 
@@ -18,3 +19,37 @@ class LocalPackageProvider(PackageProvider):
 		self.pkgnames = []
 		self.by_pkgname = {}
 		self.by_provides = {}
+
+	def load_pkgbuilds(self, pkgbuilds: list[PKGBUILD]):
+		for p in pkgbuilds:
+			pkgbase_section = p.srcinfo.sections[('pkgbase', p.pkgbase)]
+			assert len(p.pkgname) == 1 or 'provides' not in pkgbase_section
+
+			pkgbase = Pkgbase(
+				pkgbase=p.pkgbase,
+				pkgnames=[],
+				depends=pkgbase_section.get('depends', []),
+				optdepends=pkgbase_section.get('optdepends', []),
+				makedepends=pkgbase_section.get('makedepends', []),
+				provider=self,
+			)
+			for n in p.pkgname:
+				pkgname_section = p.srcinfo.sections[('pkgname', n)]
+				pkgname = Pkgname(
+					pkgbase=pkgbase,
+					pkgname=n,
+					depends=pkgname_section.get('depends', []),
+					optdepends=pkgname_section.get('depends', []),
+					makedepends=pkgname_section.get('makedepends', []),
+					provides=pkgname_section.get('provides', pkgbase_section.get('provides', [])),
+				)
+				pkgbase.pkgnames.append(pkgname)
+
+			self.pkgbases.append(pkgbase)
+			self.pkgnames.extend(pkgbase.pkgnames)
+
+		# update lookup dictionaries
+		for pkgname in self.pkgnames:
+			self.by_pkgname.setdefault(pkgname.pkgname, []).append(pkgname)
+			for name in pkgname.provides:
+				self.by_provides.setdefault(name, []).append(pkgname)
