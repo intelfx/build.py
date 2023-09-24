@@ -29,3 +29,5 @@ def review_repo(ctx: AppContext):
 
 	# find pkgbuilds
 	pkgbuilds = buildpy.proc.find_pkgbuilds(config)
+	# load pkgbuilds -> [pkgbase, [pkgname]]
+	buildpy.proc.load_pkgbuilds(pkgbuilds, config)
