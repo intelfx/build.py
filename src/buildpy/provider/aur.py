@@ -126,7 +126,7 @@ class AURPackageProvider(PackageProvider):
 		direct_pkgs = [
 			self._load_result(r)
 			for r
-			in self._aur_info(list(direct_targets))
+			in self._aur_info(direct_targets)
 		]
 		direct_names = { p.pkgname for p in direct_pkgs }
 		direct_missing = direct_targets - direct_names
@@ -143,7 +143,7 @@ class AURPackageProvider(PackageProvider):
 		#       this way we can avoid (or delay) fully loading Pkgnames but still resolve the required names
 		virtual_pkgs = [
 			self._load_result(r)
-			for r in self._aur_info([ p.pkgname for p in virtual_pkgs ])
+			for r in self._aur_info({ p.pkgname for p in virtual_pkgs })
 		]
 		virtual_names = { name for p in virtual_pkgs for name in p.provides }
 		virtual_missing = virtual_targets - virtual_names
