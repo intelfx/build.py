@@ -151,5 +151,14 @@ class SRCINFO:
 
 	@classmethod
 	def from_pkgbuild(cls, pkgbuild: 'PKGBUILD', config: Config):
-		srcinfo = pkgbuild.run_makepkg([ '--printsrcinfo' ], config=config)
-		return cls.from_lines(srcinfo.stdout.splitlines(), pkgbuild=pkgbuild)
+		srcinfo_file = pkgbuild.pkgbuild_file.parent/'.SRCINFO'
+		if srcinfo_file.exists() and srcinfo_file.stat().st_mtime >= pkgbuild.pkgbuild_file.stat().st_mtime:
+			with srcinfo_file.open('r') as f:
+				text = f.read()
+		else:
+			srcinfo = pkgbuild.run_makepkg([ '--printsrcinfo' ], config=config)
+			text = srcinfo.stdout
+			with srcinfo_file.open('w') as f:
+				f.write(text)
+
+		return cls.from_lines(text.splitlines(), pkgbuild=pkgbuild)
