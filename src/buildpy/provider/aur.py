@@ -119,6 +119,54 @@ class AURPackageProvider(PackageProvider):
 		self.by_pkgname = dict()
 		self.by_provides = dict()
 
+	def _load_result(self, arg: SearchResult|InfoResult) -> Pkgname:
+		# lookup pkgbase and pkgname
+		pkgname = self.pkgnames.get(arg.ID)
+		pkgbase = pkgname.pkgbase if pkgname is not None else self.pkgbases.get(arg.PackageBaseID)
+
+		# create missing pkgbase
+		if pkgbase is None:
+			pkgbase = Pkgbase(
+				pkgbase=arg.PackageBase,
+				version=arg.Version,
+				pkgnames=[],
+				depends=[],
+				makedepends=[],
+				optdepends=[],
+				provider=self,
+				uptodate=True,  # AUR does not provide pkgbase info, thus always True
+			)
+			self.pkgbases[arg.PackageBaseID] = pkgbase
+
+		# create missing pkgname
+		if pkgname is None:
+			pkgname = Pkgname(
+				pkgbase=pkgbase,
+				pkgname=arg.Name,
+				depends=[],
+				makedepends=[],
+				optdepends=[],
+				provides=[],
+				uptodate=False,
+			)
+			pkgbase.pkgnames.append(pkgname)
+			self.pkgnames[arg.ID] = pkgname
+			# update lookup dictionaries, step 1
+			self.by_pkgname.setdefault(pkgname.pkgname, []).append(pkgname)
+
+		# extend pkgname if we got a full result
+		if not pkgname.uptodate and isinstance(arg, InfoResult):
+			pkgname.depends = arg.Depends
+			pkgname.makedepends = arg.MakeDepends
+			pkgname.optdepends = arg.OptDepends
+			pkgname.provides = arg.Provides
+			pkgname.uptodate = True
+			# update lookup dictionaries, step 2
+			for name in pkgname.provides:
+				self.by_provides.setdefault(name, []).append(pkgname)
+
+		return pkgname
+
 	def _aur_search(self, field: str, query: str) -> list[SearchResult]:
 		resp = self._aur_query(
 			method='GET',
