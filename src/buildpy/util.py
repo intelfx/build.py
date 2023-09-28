@@ -1,14 +1,45 @@
+import copy
 import functools
 import re
 import subprocess
 import tempfile
 import typing
+import attrs
+from collections import abc
 from pathlib import Path
 
 from configupdater import ConfigUpdater
 
 # importing this file; for consistency
 from buildpy import util
+
+
+def _factorize_one(field: attrs.Attribute) -> attrs.Attribute:
+	# `abc.Collection` matches all normal "footguns" (`list`, `set`, `dict`) but also immutable objects
+	# that also happen to be sized and iterable (`str`, `bytes`). Tuples are also do not need to be transformed.
+	# To avoid this, also perform a negative check for `abc.Hashable` because any hashable object is immutable
+	# and therefore won't be a footgun in practice.
+	if isinstance(field.default, abc.Collection) and not isinstance(field.default, abc.Hashable):
+		if len(field.default) == 0:
+			# if it's an empty container, directly use container's type constructor
+			return field.evolve(default=attrs.Factory(type(field.default)))
+		else:
+			# if it's a non-empty container, we have to copy it
+			return field.evolve(default=attrs.Factory(lambda: copy.copy(field.default)))
+	return field
+
+
+def factorize(cls: type, fields: list[attrs.Attribute]) -> list[attrs.Attribute]:
+	"""
+	A hook for `attrs.define(field_transformer=...)` that converts containers into factories in default field values
+	(thus preventing footguns)::
+
+		@attrs.define(field_transformer=factorize)
+		class Foo:
+			field: list[str] = []  # not a footgun
+
+	"""
+	return [ _factorize_one(f) for f in fields ]
 
 
 def with_newline(arg: str) -> str:
