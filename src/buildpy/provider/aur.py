@@ -119,6 +119,34 @@ class AURPackageProvider(PackageProvider):
 		self.by_pkgname = dict()
 		self.by_provides = dict()
 
+	def load_packages(self, pkgnames: list[str]):
+		# step 1: direct lookup by pkgname
+		direct_targets = set(pkgnames) - self.by_pkgname.keys()
+		direct_pkgs = [
+			self._load_result(r)
+			for r
+			in self._aur_info(list(direct_targets))
+		]
+		direct_names = { p.pkgname for p in direct_pkgs }
+		direct_missing = direct_targets - direct_names
+
+		# step 2: lookup by provides
+		virtual_targets = direct_missing - self.by_provides.keys()
+		virtual_pkgs = [
+			self._load_result(r)
+			for name in virtual_targets
+			for r in self._aur_search(field='provides', query=name)
+		]
+		# search only gives partial results; fully load them to get provided names
+		# TODO: somehow inject the searched-for provided name into the corresponding Pkgnames
+		#       this way we can avoid (or delay) fully loading Pkgnames but still resolve the required names
+		virtual_pkgs = [
+			self._load_result(r)
+			for r in self._aur_info([ p.pkgname for p in virtual_pkgs ])
+		]
+		virtual_names = { name for p in virtual_pkgs for name in p.provides }
+		virtual_missing = virtual_targets - virtual_names
+
 	def _load_result(self, arg: SearchResult|InfoResult) -> Pkgname:
 		# lookup pkgbase and pkgname
 		pkgname = self.pkgnames.get(arg.ID)
