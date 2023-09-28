@@ -181,7 +181,7 @@ class AURPackageProvider(PackageProvider):
 		resp = self._aur_query(
 			method='POST',
 			url='/rpc/v5/info',
-			data={ 'arg': pkgnames },
+			data={ 'arg[]': pkgnames },
 		)
 		if not isinstance(resp, InfoResponse):
 			raise self.Error(f'Invalid response type: {resp}')
