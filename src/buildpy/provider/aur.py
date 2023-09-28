@@ -119,6 +119,26 @@ class AURPackageProvider(PackageProvider):
 		self.by_pkgname = dict()
 		self.by_provides = dict()
 
+	def _aur_search(self, field: str, query: str) -> list[SearchResult]:
+		resp = self._aur_query(
+			method='GET',
+			url=f'/rpc/v5/search/{query}',
+			params={ 'by': field },
+		)
+		if not isinstance(resp, SearchResponse):
+			raise self.Error(f'Invalid response type: {resp}')
+		return resp.results
+
+	def _aur_info(self, pkgnames: list[str]) -> list[InfoResult]:
+		resp = self._aur_query(
+			method='POST',
+			url='/rpc/v5/info',
+			data={ 'arg': pkgnames },
+		)
+		if not isinstance(resp, InfoResponse):
+			raise self.Error(f'Invalid response type: {resp}')
+		return resp.results
+
 	def _aur_query(
 		self,
 		method: str,
