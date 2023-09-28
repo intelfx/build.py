@@ -15,6 +15,7 @@ class Pkgbase:
 	makedepends: 'list[Pkgname|str]'
 	optdepends: 'list[Pkgname|str]'
 	provider: Any
+	uptodate: bool
 
 
 @attr.s
@@ -25,3 +26,4 @@ class Pkgname:
 	makedepends: 'list[Pkgname|str]'
 	optdepends: 'list[Pkgname|str]'
 	provides: 'list[str]'
+	uptodate: bool

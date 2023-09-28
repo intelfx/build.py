@@ -38,6 +38,7 @@ class LocalPackageProvider(PackageProvider):
 				optdepends=pkgbase_section.get('optdepends', []),
 				makedepends=pkgbase_section.get('makedepends', []),
 				provider=self,
+				uptodate=True,
 			)
 			for n in p.pkgname:
 				pkgname_section = p.srcinfo.sections[('pkgname', n)]
@@ -48,6 +49,7 @@ class LocalPackageProvider(PackageProvider):
 					optdepends=pkgname_section.get('depends', []),
 					makedepends=pkgname_section.get('makedepends', []),
 					provides=pkgname_section.get('provides', pkgbase_section.get('provides', [])),
+					uptodate=True,
 				)
 				pkgbase.pkgnames.append(pkgname)
 
