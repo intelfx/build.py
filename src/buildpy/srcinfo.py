@@ -70,6 +70,7 @@ class SRCINFO:
 			'sha256sums',
 			'sha384sums',
 			'sha512sums',
+			'b2sums',
 		)
 
 		# section of section headers
