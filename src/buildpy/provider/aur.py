@@ -1,3 +1,4 @@
+from collections import abc
 from typing import (
 	TypeAlias,
 	ClassVar,
@@ -205,7 +206,7 @@ class AURPackageProvider(PackageProvider):
 			raise self.Error(f'Invalid response type: {resp}')
 		return resp.results
 
-	def _aur_info(self, pkgnames: list[str]) -> list[InfoResult]:
+	def _aur_info(self, pkgnames: abc.Iterable[str]) -> list[InfoResult]:
 		resp = self._aur_query(
 			method='POST',
 			url='/rpc/v5/info',
