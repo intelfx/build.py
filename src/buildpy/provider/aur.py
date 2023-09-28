@@ -119,13 +119,20 @@ class AURPackageProvider(PackageProvider):
 		self.by_pkgname = dict()
 		self.by_provides = dict()
 
-	def _aur_query(self, method: str, url: str, params: Optional[dict[str, str]] = None) -> Response:
+	def _aur_query(
+		self,
+		method: str,
+		url: str,
+		params: Optional[dict[str, str]] = None,
+		data: Optional = None,
+	) -> Response:
 		resp = None
 		try:
 			resp = requests.request(
 				method=method,
 				url=self.base_url + url,
 				params=params,
+				data=data,
 				allow_redirects=False,
 			)
 			resp.raise_for_status()
