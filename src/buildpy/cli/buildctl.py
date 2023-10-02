@@ -4,13 +4,9 @@ import attr, attrs
 import buildpy.proc
 import buildpy.util
 from buildpy.config import Config
+from buildpy.context import AppContext
 
 attr.s, attr.ib = attrs.define, attrs.field
-
-
-@attr.s
-class AppContext:
-	config: Config
 
 
 @click.group(context_settings=dict(auto_envvar_prefix='BUILDCTL'))
