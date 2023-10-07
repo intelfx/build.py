@@ -9,6 +9,7 @@ from typing import (
 import attr, attrs
 attr.s, attr.ib = attrs.define, attrs.field
 
+import buildpy.util
 from buildpy.config import Config
 if TYPE_CHECKING:
 	from buildpy.srcinfo import SRCINFO
@@ -82,9 +83,10 @@ class PKGBUILD:
 
 	def pipe_makepkg(self, args: list[str], *, config: Config, **kwargs) \
 			-> subprocess.Popen[str]:
-		return subprocess.Popen(
+		return buildpy.util.Popen(
 			args=self._makepkg_args(args, config=config),
 			cwd=self.pkgbuild_file.parent,
+			check=True,
 			text=True,
 			stdin=subprocess.DEVNULL,
 			stdout=subprocess.PIPE,
