@@ -10,4 +10,4 @@ _PROVIDERS = (
 
 
 def setup(ctx: AppContext):
-	ctx.providers.update({ T: T() for T in _PROVIDERS })
+	ctx.providers.update({ T: T(ctx) for T in _PROVIDERS })

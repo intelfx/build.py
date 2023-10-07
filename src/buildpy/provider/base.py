@@ -12,6 +12,10 @@ if TYPE_CHECKING:
 class PackageProvider(ABC):
 	id: ClassVar[str]
 
+	@abstractmethod
+	def __init__(self, _: 'AppContext'):
+		...
+
 	@classmethod
 	def get(cls, ctx: 'AppContext') -> Self:
 		return ctx.providers[cls]

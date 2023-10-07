@@ -1,10 +1,13 @@
 from typing import (
+	TYPE_CHECKING,
 	ClassVar,
 )
 
 from buildpy.package import Pkgbase, Pkgname
 from buildpy.pkgbuild import PKGBUILD
 from .base import PackageProvider
+if TYPE_CHECKING:
+	from buildpy.context import AppContext
 
 
 class LocalPackageProvider(PackageProvider):
@@ -14,7 +17,7 @@ class LocalPackageProvider(PackageProvider):
 	by_pkgname: dict[str, list[Pkgname]]
 	by_provides: dict[str, list[Pkgname]]
 
-	def __init__(self):
+	def __init__(self, _: 'AppContext'):
 		self.pkgbases = []
 		self.pkgnames = []
 		self.by_pkgname = {}

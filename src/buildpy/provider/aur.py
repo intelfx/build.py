@@ -1,5 +1,6 @@
 from collections import abc
 from typing import (
+	TYPE_CHECKING,
 	TypeAlias,
 	ClassVar,
 	Optional,
@@ -13,6 +14,8 @@ import requests
 import buildpy.util
 from buildpy.package import Pkgbase, Pkgname
 from .base import PackageProvider
+if TYPE_CHECKING:
+	from buildpy.context import AppContext
 
 attr.s, attr.ib = attrs.define, attrs.field
 
@@ -114,7 +117,7 @@ class AURPackageProvider(PackageProvider):
 	by_pkgname: dict[str, list[Pkgname]]
 	by_provides: dict[str, list[Pkgname]]
 
-	def __init__(self):
+	def __init__(self, _: 'AppContext'):
 		self.pkgbases = dict()
 		self.pkgnames = dict()
 		self.by_pkgname = dict()
