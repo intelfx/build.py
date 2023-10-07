@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 from typing import (
 	TYPE_CHECKING,
+	Self,
 )
 
 import attr, attrs
@@ -45,7 +46,7 @@ class PKGBUILD:
 		raise self.Error(self, *args)
 
 	@classmethod
-	def from_path(cls, base_dir: Path, pkgbuild_file: Path):
+	def from_path(cls, base_dir: Path, pkgbuild_file: Path) -> Self:
 		return cls(
 			state=cls.State.Unparsed,
 			base_dir=base_dir,
@@ -53,7 +54,7 @@ class PKGBUILD:
 		)
 
 	@classmethod
-	def from_config(cls, config_file: Path):
+	def from_config(cls, config_file: Path) -> Self:
 		raise NotImplementedError()
 
 	def _makepkg_args(self, args: list[str], *, config: Config) -> list[str]:

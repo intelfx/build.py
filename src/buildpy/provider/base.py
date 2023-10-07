@@ -1,16 +1,14 @@
 from typing import (
 	ClassVar,
-	TypeVar,
+	Self,
 )
 from abc import ABC, abstractmethod
-
-T = TypeVar('T')
 
 
 class PackageProvider(ABC):
 	id: ClassVar[str]
 
 	@classmethod
-	def get(cls: type[T]) -> T:
+	def get(cls) -> Self:
 		from . import _REGISTRY
 		return _REGISTRY[cls]  # noqa

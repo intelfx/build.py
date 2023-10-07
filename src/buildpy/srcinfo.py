@@ -5,6 +5,7 @@ import re
 from typing import (
 	TYPE_CHECKING,
 	TypeAlias,
+	Self,
 )
 
 import attr, attrs
@@ -30,7 +31,7 @@ class SRCINFO:
 	sections: dict[SrcinfoSectionHeader, SrcinfoSection]
 
 	@classmethod
-	def from_lines(cls, srcinfo_lines: abc.Iterable[str], pkgbuild: 'PKGBUILD'):
+	def from_lines(cls, srcinfo_lines: abc.Iterable[str], pkgbuild: 'PKGBUILD') -> Self:
 		section_keys = (
 			'pkgbase',
 			'pkgname',
@@ -147,11 +148,11 @@ class SRCINFO:
 		return cls(headers=headers, sections=sections)
 
 	@classmethod
-	def from_file(cls, srcinfo_file: typing.TextIO, pkgbuild: 'PKGBUILD'):
+	def from_file(cls, srcinfo_file: typing.TextIO, pkgbuild: 'PKGBUILD') -> Self:
 		return cls.from_lines(srcinfo_file.readlines(), pkgbuild=pkgbuild)
 
 	@classmethod
-	def from_pkgbuild(cls, pkgbuild: 'PKGBUILD', config: Config):
+	def from_pkgbuild(cls, pkgbuild: 'PKGBUILD', config: Config) -> Self:
 		srcinfo_file = pkgbuild.pkgbuild_file.parent/'.SRCINFO'
 		if srcinfo_file.exists() and srcinfo_file.stat().st_mtime >= pkgbuild.pkgbuild_file.stat().st_mtime:
 			with srcinfo_file.open('r') as f:
