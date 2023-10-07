@@ -1,7 +1,9 @@
 import contextlib
+import tempfile
 from typing import (
 	TYPE_CHECKING,
 	TypeVar,
+	Any,
 )
 import attr, attrs
 
@@ -20,6 +22,26 @@ class AppContext:
 	config: Config
 	providers: dict[type[Tp], Tp] = attr.ib(factory=dict)
 	_stack: contextlib.ExitStack = attr.ib(factory=contextlib.ExitStack)
+	_tmpdirs: dict[Any, tempfile.TemporaryDirectory] = attr.ib(factory=dict)
+
+	def tmpdir(self, tag=None, suffix=None, prefix=None, dir=None, ignore_cleanup_errors=False) \
+			-> tempfile.TemporaryDirectory:
+		if tag is not None:
+			try:
+				return self._tmpdirs[tag]
+			except KeyError:
+				pass
+		r = self._push_context(
+			tempfile.TemporaryDirectory(
+				suffix=suffix,
+				prefix=prefix,
+				dir=dir,
+				ignore_cleanup_errors=ignore_cleanup_errors,
+			)
+		)
+		if tag is not None:
+			self._tmpdirs[tag] = r
+		return r
 
 	def _push_context(self, obj: T) -> T:
 		self._stack.enter_context(obj)
