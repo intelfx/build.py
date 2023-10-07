@@ -9,9 +9,9 @@ attr.s, attr.ib = attrs.define, attrs.field
 
 @attr.s
 class Config:
-	config_root: Path = Path.home()/'build.py'
+	config_root: Path = Path('/etc/aurutils')
 	pkgbuild_root: Path = Path.home()/'pkgbuild'
 
 	repo_name: str = 'custom'
-	makepkg_conf: Path = config_root/'makepkg.conf'
-	pacman_conf: Path = config_root/'pacman.conf'
+	makepkg_conf: Path = config_root/f'makepkg-{repo_name}.conf'
+	pacman_conf: Path = config_root/f'pacman-{repo_name}.conf'
