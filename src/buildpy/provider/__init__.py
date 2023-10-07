@@ -1,9 +1,13 @@
+from buildpy.context import AppContext
 from .base import PackageProvider
 from .local import LocalPackageProvider
 from .aur import AURPackageProvider
 
 _PROVIDERS = (
-	LocalPackageProvider(),
-	AURPackageProvider(),
+	LocalPackageProvider,
+	AURPackageProvider,
 )
-_REGISTRY = { type(p): p for p in _PROVIDERS }
+
+
+def setup(ctx: AppContext):
+	ctx.providers.update({ T: T() for T in _PROVIDERS })

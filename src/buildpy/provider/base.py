@@ -1,14 +1,17 @@
 from typing import (
+	TYPE_CHECKING,
 	ClassVar,
 	Self,
 )
 from abc import ABC, abstractmethod
+
+if TYPE_CHECKING:
+	from buildpy.context import AppContext
 
 
 class PackageProvider(ABC):
 	id: ClassVar[str]
 
 	@classmethod
-	def get(cls) -> Self:
-		from . import _REGISTRY
-		return _REGISTRY[cls]  # noqa
+	def get(cls, ctx: 'AppContext') -> Self:
+		return ctx.providers[cls]
