@@ -48,6 +48,18 @@ def with_newline(arg: str) -> str:
 	return arg
 
 
+def pacman_conf_remove_repo(dir: Path, pacman_conf: Path, repos: abc.Sequence[str]) \
+		-> Path:
+	conf = ConfigUpdater(allow_no_value=True)
+	conf.read(pacman_conf)
+	for r in repos:
+		conf.remove_section(r)
+
+	with tempfile.NamedTemporaryFile(mode='w', dir=dir, prefix='pacman', suffix='.conf', delete=False) as f:
+		conf.write(f)
+	return Path(f.name)
+
+
 def pacman_conf_prepend_repo2(pacman_conf: Path, repo_name: str, repo_section: str) -> typing.TextIO:
 	repo_text = f'[{repo_name}]\n{repo_section}'
 	section = ConfigUpdater(allow_no_value=True)
