@@ -16,6 +16,7 @@ def buildctl(cctx: click.Context):
 	cctx.obj = ctx = AppContext(
 		config=Config(),
 	)
+	cctx.with_resource(ctx)
 	buildpy.provider.setup(ctx)
 
 
